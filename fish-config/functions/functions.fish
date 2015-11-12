@@ -1,6 +1,6 @@
 function fish_user_key_bindings
     if status --is-login
-     bind \x1b forward-word
-     bind \x1d  backward-word
+     bind \x1d  forward-word
+     bind \x1b  backward-word
     end
 end
