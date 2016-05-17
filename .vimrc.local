@@ -1,12 +1,8 @@
-"syntax on
-"set background=dark
-"let g:solarized_termtrans = 1
-"colorscheme solarized
-
 "set window to fullfill the screen without entering in the fullscreen mode
 set lines=999
 set columns=999
-"map <esc> to jk in insert mode
+
+"map <esc> to jj in insert mode
 inoremap jj <Esc>
 
 "Accept the cycling auto-complete results pressing enter
