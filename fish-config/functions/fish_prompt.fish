@@ -1,71 +1,46 @@
-function fish_prompt
-    set_color $fish_color_cwd
-    echo -n (prompt_pwd)
-    set_color normal
-    echo -n ' > '
+# Fish prompt based on GitStatus theme of Oh-my-fish
+# Reference: https://github.com/godfat/fish_prompt-gitstatus
+
+function _virtualenv_wrapper
+  if set -q VIRTUAL_ENV
+      echo -n -s (set_color -b blue white) "(" (basename "$VIRTUAL_ENV") ")" (set_color normal) " "
+  end
 end
 
-#set fish_color_user ffd787
-#set fish_color_host 0087d7
-#
-#function fish_prompt --description 'Write out the prompt'
-	
-#	set -l last_status $status
+function _git_branch_name
+  echo (command git symbolic-ref HEAD ^/dev/null | sed -e 's|^refs/heads/||')
+end
 
-	# Just calculate these once, to save a few cycles when displaying the prompt
-#	if not set -q __fish_prompt_hostname
-#		set -g __fish_prompt_hostname (hostname|cut -d . -f 1)
-#	end
+function _git_status_symbol
+  set -l git_status (git status --porcelain ^/dev/null)
+  if test -n "$git_status"
+    # Is there anyway to preserve newlines so we can reuse $git_status?
+    if git status --porcelain ^/dev/null | grep '^.[^ ]' >/dev/null
+      echo '*' # dirty
+    else
+      echo '#' # all staged
+    end
+  else
+    echo    '' # clean
+  end
+end
 
-#	if not set -q __fish_prompt_normal
-#		set -g __fish_prompt_normal (set_color normal)
-#	end
-#
-#	set -l delim '>'
-#
-#	switch $USER
-#
-#	case root
-#
-#		if not set -q __fish_prompt_cwd
-#			if set -q fish_color_cwd_root
-#				set -g __fish_prompt_cwd (set_color $fish_color_cwd_root)
-#			else
-#				set -g __fish_prompt_cwd (set_color $fish_color_cwd)
-#			end
-#		end
-#
-#	case '*'
-#
-#		if not set -q __fish_prompt_cwd
-#			set -g __fish_prompt_cwd (set_color $fish_color_cwd)
-#		end
-#
-#	end
-#
-#	set -l prompt_status
-#	if test $last_status -ne 0
-#		if not set -q __fish_prompt_status
-#			set -g __fish_prompt_status (set_color $fish_color_status)
-#		end
-#		set prompt_status "$__fish_prompt_status [$last_status]$__fish_prompt_normal"
-#	end
-#
-#	if not set -q __fish_prompt_user
-#		set -g __fish_prompt_user (set_color $fish_color_user)
-#	end
-#	if not set -q __fish_prompt_host
-#		set -g __fish_prompt_host (set_color $fish_color_host)
-#	end
+function _remote_hostname
+  if test -n "$SSH_CONNECTION"
+    echo (whoami)@(hostname)
+  end
+end
 
-#	echo -n -s "$__fish_prompt_user" "$USER" "$__fish_prompt_normal" @ "$__fish_prompt_host" "$__fish_prompt_hostname" "$__fish_prompt_normal" ' ' "$__fish_prompt_cwd" (pwd) 
-#  echo -n -s (set_color brown) (__fish_git_prompt) (set_color normal)
+function fish_prompt
+  set -l cyan (set_color cyan)
+  set -l normal (set_color normal)
 
-#  if set -q VIRTUAL_ENV
-#    echo -n -s (set_color red) " [" (basename "$VIRTUAL_ENV") "]" (set_color normal) " "
-#  end
+  set -l cwd (set_color $fish_color_cwd)(prompt_pwd)
+  set -l git_status (_git_status_symbol)(_git_branch_name)
 
-#  echo -n -s "$__fish_prompt_normal" "$prompt_status" 
-#  echo
-#  echo "$delim" ''
-#end
+  if test -n "$git_status"
+    set git_status " $git_status"
+  end
+
+  echo -n (_remote_hostname) (_virtualenv_wrapper) $cwd$cyan$git_status$normal'> '
+end
