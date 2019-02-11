@@ -64,8 +64,6 @@ brew cask install emacs
 brew cask install iterm2
 brew cask install vlc
 brew cask install google-chrome
-brew cask install alfred
-brew cask install atom
 
 
 # Remove outdated versions from the cellar.
